@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Advanced Music Player</title>
+<style>
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    background: #121212;
+    color: #fff;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+  }
+  .player {
+    background: #1e1e1e;
+    padding: 30px;
+    border-radius: 20px;
+    width: 350px;
+    box-shadow: 0 15px 30px rgba(0,0,0,0.7);
+  }
+  .player .track-info {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  .player .track-info img {
+    width: 100%;
+    border-radius: 15px;
+    margin-bottom: 15px;
+  }
+  .player .track-info h2 {
+    font-size: 1.5rem;
+    margin-bottom: 5px;
+  }
+  .player .track-info p {
+    color: #bbb;
+    margin: 0;
+  }
+  .controls {
+    display: flex;
+    justify-content: center;
+    gap: 25px;
+    margin-bottom: 20px;
+  }
+  .controls button {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 28px;
+    cursor: pointer;
+    transition: color 0.3s ease;
+  }
+  .controls button:hover {
+    color: #ff4b5c;
+  }
+  .progress-container {
+    background: #333;
+    height: 8px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-bottom: 15px;
+  }
+  .progress {
+    background: #ff4b5c;
+    height: 100%;
+    width: 0%;
+    border-radius: 5px;
+    transition: width 0.1s linear;
+  }
+  .time {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9rem;
+    color: #aaa;
+    margin-bottom: 20px;
+  }
+  .volume-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .volume-container input[type="range"] {
+    width: 100%;
+  }
+  .volume-icon {
+    font-size: 22px;
+    color: #fff;
+  }
+  @media (max-width: 400px) {
+    .player {
+      width: 90vw;
+      padding: 20px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="player">
+  <div class="track-info">
+    <img src="" alt="Album Art" id="cover" />
+    <h2 id="title">Title</h2>
+    <p id="artist">Artist</p>
+  </div>
+
+  <div class="controls">
+    <button id="prev" title="Previous">&#9664;&#9664;</button>
+    <button id="play" title="Play/Pause">&#9654;</button>
+    <button id="next" title="Next">&#9654;&#9654;</button>
+  </div>
+
+  <div class="progress-container" id="progress-container">
+    <div class="progress" id="progress"></div>
+  </div>
+
+  <div class="time">
+    <span id="current-time">0:00</span>
+    <span id="duration">0:00</span>
+  </div>
+
+  <div class="volume-container">
+    <span class="volume-icon">&#128266;</span>
+    <input type="range" id="volume" min="0" max="1" step="0.01" value="1" />
+  </div>
+</div>
+
+<script>
+  // Song list
+  const songs = [
+    {
+      title: "Sample Song 1",
+      artist: "Artist One",
+      src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
+      cover: "https://picsum.photos/id/237/400/400"
+    },
+    {
+      title: "Sample Song 2",
+      artist: "Artist Two",
+      src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
+      cover: "https://picsum.photos/id/238/400/400"
+    },
+    {
+      title: "Sample Song 3",
+      artist: "Artist Three",
+      src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3",
+      cover: "https://picsum.photos/id/239/400/400"
+    }
+  ];
+
+  // DOM Elements
+  const cover = document.getElementById('cover');
+  const title = document.getElementById('title');
+  const artist = document.getElementById('artist');
+  const playBtn = document.getElementById('play');
+  const prevBtn = document.getElementById('prev');
+  const nextBtn = document.getElementById('next');
+  const progress = document.getElementById('progress');
+  const progressContainer = document.getElementById('progress-container');
+  const currentTimeEl = document.getElementById('current-time');
+  const durationEl = document.getElementById('duration');
+  const volumeSlider = document.getElementById('volume');
+
+  // Audio object
+  const audio = new Audio();
+  let currentSongIndex = 0;
+  let isPlaying = false;
+
+  // Load song
+  function loadSong(index) {
+    const song = songs[index];
+    audio.src = song.src;
+    title.textContent = song.title;
+    artist.textContent = song.artist;
+    cover.src = song.cover;
+  }
+
+  // Play song
+  function playSong() {
+    audio.play();
+    isPlaying = true;
+    playBtn.innerHTML = '&#10074;&#10074;'; // pause icon
+  }
+
+  // Pause song
+  function pauseSong() {
+    audio.pause();
+    isPlaying = false;
+    playBtn.innerHTML = '&#9654;'; // play icon
+  }
+
+  // Toggle play/pause
+  playBtn.addEventListener('click', () => {
+    if (isPlaying) {
+      pauseSong();
+    } else {
+      playSong();
+    }
+  });
+
+  // Previous song
+  prevBtn.addEventListener('click', () => {
+    currentSongIndex--;
+    if (currentSongIndex < 0) currentSongIndex = songs.length - 1;
+    loadSong(currentSongIndex);
+    playSong();
+  });
+
+  // Next song
+  nextBtn.addEventListener('click', () => {
+    currentSongIndex++;
+    if (currentSongIndex >= songs.length) currentSongIndex = 0;
+    loadSong(currentSongIndex);
+    playSong();
+  });
+
+  // Update progress bar
+  audio.addEventListener('timeupdate', () => {
+    if (audio.duration) {
+      const progressPercent = (audio.currentTime / audio.duration) * 100;
+      progress.style.width = `${progressPercent}%`;
+
+      // Update time display
+      currentTimeEl.textContent = formatTime(audio.currentTime);
+      durationEl.textContent = formatTime(audio.duration);
+    }
+  });
+
+  // Seek on progress bar click
+  progressContainer.addEventListener('click', (e) => {
+    const width = progressContainer.clientWidth;
+    const clickX = e.offsetX;
+    const duration = audio.duration;
+
+    audio.currentTime = (clickX / width) * duration;
+  });
+
+  // Volume control
+  volumeSlider.addEventListener('input', (e) => {
+    audio.volume = e.target.value;
+  });
+
+  // Format time (seconds to MM:SS)
+  function formatTime(time) {
+    const minutes = Math.floor(time / 60) || 0;
+    const seconds = Math.floor(time % 60) || 0;
+    return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+  }
+
+  // Auto next when current ends
+  audio.addEventListener('ended', () => {
+    nextBtn.click();
+  });
+
+  // Initialize
+  loadSong(currentSongIndex);
+</script>
+
+</body>
+</html>
